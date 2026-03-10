@@ -12,17 +12,17 @@ export default function FAQ() {
 
   return (
     <section id="faq" className="relative py-24 md:py-32 overflow-hidden" style={{ background: "var(--bg)" }}>
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 60%, rgba(59,130,246,0.03) 0%, transparent 60%)" }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 60%, rgba(123,181,214,0.03) 0%, transparent 60%)" }} />
 
       <div className="relative mx-auto max-w-3xl px-4">
         <motion.div
           className="mb-16 text-center"
-          initial={prefersReduced ? {} : { opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={prefersReduced ? {} : { opacity: 0, filter: "blur(8px)" }}
+          whileInView={{ opacity: 1, filter: "blur(0px)" }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: EASE_SNAPPY }}
+          transition={{ duration: 0.6 }}
         >
-          <span className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs tracking-widest uppercase" style={{ background: "rgba(59,130,246,0.08)", color: "var(--accent)", border: "1px solid rgba(59,130,246,0.15)", fontFamily: "var(--font-mono)" }}>
+          <span className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs tracking-widest uppercase" style={{ background: "rgba(123,181,214,0.08)", color: "var(--accent)", border: "1px solid rgba(123,181,214,0.15)", fontFamily: "var(--font-mono)" }}>
             FAQ
           </span>
           <h2 className="mt-6 text-3xl font-bold md:text-5xl">{FAQ_DATA.heading}</h2>
@@ -36,11 +36,11 @@ export default function FAQ() {
                 key={i}
                 className="overflow-hidden rounded-xl border transition-all duration-300"
                 style={{
-                  borderColor: isOpen ? "rgba(59,130,246,0.2)" : "var(--border)",
-                  background: isOpen ? "rgba(59,130,246,0.03)" : "var(--card)",
+                  borderColor: isOpen ? "rgba(123,181,214,0.2)" : "var(--border)",
+                  background: isOpen ? "rgba(123,181,214,0.03)" : "var(--card)",
                 }}
-                initial={prefersReduced ? {} : { opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={prefersReduced ? {} : { opacity: 0, scale: 0.97 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.05, ease: EASE_SNAPPY }}
               >
@@ -68,7 +68,7 @@ export default function FAQ() {
                       transition={{ height: { duration: 0.3, ease: EASE_SNAPPY }, opacity: { duration: 0.2 } }}
                       className="overflow-hidden"
                     >
-                      <p className="px-6 pb-5 text-sm leading-relaxed text-text-body md:pb-6 md:text-base">{item.answer}</p>
+                      <p className="px-6 pb-5 text-sm leading-relaxed md:pb-6 md:text-base" style={{ color: "var(--text-body)" }}>{item.answer}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

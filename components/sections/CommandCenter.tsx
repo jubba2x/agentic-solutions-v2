@@ -26,7 +26,6 @@ function MiniChart({ color, height = 60 }: { color: string; height?: number }) {
       y: height * 0.2 + Math.sin(i * 0.5) * height * 0.15 + Math.random() * height * 0.2 + (i / 19) * height * -0.3,
     }));
 
-    // Area fill
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
     gradient.addColorStop(0, `${color}30`);
     gradient.addColorStop(1, "transparent");
@@ -39,7 +38,6 @@ function MiniChart({ color, height = 60 }: { color: string; height?: number }) {
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    // Line
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (let i = 1; i < points.length; i++) {
@@ -50,7 +48,6 @@ function MiniChart({ color, height = 60 }: { color: string; height?: number }) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // End dot
     const last = points[points.length - 1];
     ctx.beginPath();
     ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
@@ -61,7 +58,7 @@ function MiniChart({ color, height = 60 }: { color: string; height?: number }) {
   return <canvas ref={canvasRef} className="w-full" style={{ height }} />;
 }
 
-const METRIC_COLORS = ["#3B82F6", "#06B6D4", "#10B981", "#8B5CF6"];
+const METRIC_COLORS = ["#7BB5D6", "#B4A0D8", "#5A9CC5", "#6BC5D4"];
 
 export default function CommandCenter() {
   const prefersReduced = usePrefersReducedMotion();
@@ -72,8 +69,9 @@ export default function CommandCenter() {
       id="command-center"
       className="relative py-24 md:py-32 overflow-hidden"
       style={{ background: "var(--bg-alt)" }}
+      aria-label="AI Command Center Dashboard"
     >
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.04) 0%, transparent 60%)" }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 50%, rgba(123,181,214,0.04) 0%, transparent 60%)" }} />
 
       <div className="relative mx-auto max-w-5xl px-4">
         <motion.div
@@ -83,57 +81,52 @@ export default function CommandCenter() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: EASE_SNAPPY }}
         >
-          <span className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs tracking-widest uppercase" style={{ background: "rgba(6,182,212,0.08)", color: "#06B6D4", border: "1px solid rgba(6,182,212,0.15)", fontFamily: "var(--font-mono)" }}>
+          <span className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs tracking-widest uppercase" style={{ background: "rgba(107,197,212,0.08)", color: "#6BC5D4", border: "1px solid rgba(107,197,212,0.15)", fontFamily: "var(--font-mono)" }}>
             Dashboard
           </span>
           <h2 className="mt-6 text-3xl font-bold md:text-5xl">{COMMAND_CENTER.heading}</h2>
-          <p className="mt-4 text-base text-text-body md:text-lg">{COMMAND_CENTER.subheading}</p>
+          <p className="mt-4 text-base md:text-lg" style={{ color: "var(--text-body)" }}>{COMMAND_CENTER.subheading}</p>
         </motion.div>
 
-        {/* Dashboard */}
         <motion.div
           className="relative overflow-hidden rounded-2xl border"
-          style={{ borderColor: "rgba(59,130,246,0.15)", background: "rgba(3,0,20,0.6)", backdropFilter: "blur(20px)" }}
+          style={{ borderColor: "rgba(123,181,214,0.12)", background: "rgba(6,10,16,0.8)" }}
           initial={prefersReduced ? {} : { scale: 0.9, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: EASE_SNAPPY }}
         >
-          {/* Scanline effect */}
           {!prefersReduced && (
             <motion.div
               className="pointer-events-none absolute inset-x-0 h-[1px]"
-              style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent)" }}
+              style={{ background: "linear-gradient(90deg, transparent, rgba(123,181,214,0.3), transparent)" }}
               animate={{ top: ["0%", "100%"] }}
               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
             />
           )}
 
-          {/* Grid background */}
           {!isMobile && (
-            <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(59,130,246,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.02) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+            <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(123,181,214,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(123,181,214,0.02) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
           )}
 
-          {/* Header bar */}
-          <div className="relative flex items-center justify-between border-b px-6 py-4" style={{ borderColor: "rgba(59,130,246,0.1)" }}>
+          <div className="relative flex items-center justify-between border-b px-6 py-4" style={{ borderColor: "rgba(123,181,214,0.1)" }}>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#EF4444" }} />
-              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#F59E0B" }} />
-              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#22C55E" }} />
-              <span className="ml-4 text-xs text-text-muted" style={{ fontFamily: "var(--font-mono)" }}>agentic-command-center</span>
+              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#E87B7B" }} />
+              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#D4A85A" }} />
+              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#5AC5A0" }} />
+              <span className="ml-4 text-xs" style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>agentic-command-center</span>
             </div>
             <div className="flex items-center gap-2">
               <motion.div
                 className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: "#22C55E" }}
+                style={{ backgroundColor: "#5AC5A0" }}
                 animate={prefersReduced ? {} : { opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
-              <span className="text-xs font-medium" style={{ color: "#22C55E", fontFamily: "var(--font-mono)" }}>LIVE</span>
+              <span className="text-xs font-medium" style={{ color: "#5AC5A0", fontFamily: "var(--font-mono)" }}>LIVE</span>
             </div>
           </div>
 
-          {/* Metrics */}
           <div className="relative grid grid-cols-2 gap-4 p-6 md:grid-cols-4 md:gap-6 md:p-8">
             {COMMAND_CENTER.metrics.map((metric, i) => (
               <div

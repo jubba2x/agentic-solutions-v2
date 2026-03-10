@@ -8,6 +8,7 @@ interface MorphingTextProps {
   words: readonly string[];
   interval?: number;
   className?: string;
+  style?: React.CSSProperties;
   delay?: number;
 }
 
@@ -15,6 +16,7 @@ export default function MorphingText({
   words,
   interval = 3000,
   className = "",
+  style,
   delay = 0,
 }: MorphingTextProps) {
   const [index, setIndex] = useState(0);
@@ -34,12 +36,12 @@ export default function MorphingText({
     return () => clearInterval(timer);
   }, [started, words.length, interval]);
 
-  if (!started) return <span className={className}>{words[0]}</span>;
+  if (!started) return <span className={className} style={style}>{words[0]}</span>;
 
-  if (prefersReduced) return <span className={className}>{words[index]}</span>;
+  if (prefersReduced) return <span className={className} style={style}>{words[index]}</span>;
 
   return (
-    <span className={`relative inline-block ${className}`}>
+    <span className={`relative inline-block ${className}`} style={style}>
       <AnimatePresence mode="wait">
         <motion.span
           key={index}

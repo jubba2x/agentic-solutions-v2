@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useSpring } from "framer-motion";
 import { useIsMobile, usePrefersReducedMotion } from "@/lib/hooks";
 
@@ -24,6 +24,7 @@ export default function MagneticButton({
   const ref = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const prefersReduced = usePrefersReducedMotion();
+  const [hovered, setHovered] = useState(false);
 
   const x = useSpring(0, { stiffness: 150, damping: 15 });
   const y = useSpring(0, { stiffness: 150, damping: 15 });
@@ -37,13 +38,7 @@ export default function MagneticButton({
     y.set((e.clientY - centerY) * strength);
   };
 
-  const handleMouseLeave = () => { x.set(0); y.set(0); };
-
-  const baseStyles = {
-    primary: "text-white font-semibold",
-    ghost: "border text-white hover:bg-white/5",
-    outline: "border text-white",
-  }[variant];
+  const handleMouseLeave = () => { x.set(0); y.set(0); setHovered(false); };
 
   const Component = href ? "a" : "button";
   const linkProps = href
@@ -55,41 +50,62 @@ export default function MagneticButton({
       ref={ref}
       style={{ x, y }}
       onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
       onMouseLeave={handleMouseLeave}
       className="inline-block"
     >
       <Component
         {...linkProps}
         onClick={onClick}
-        className={`group relative overflow-hidden rounded-xl px-10 py-5 text-lg inline-block cursor-pointer transition-all duration-300 ${baseStyles} ${className}`}
+        className={`group relative overflow-hidden inline-flex items-center gap-3 cursor-pointer transition-all duration-300 ${className}`}
         style={{
-          background: variant === "primary"
-            ? "linear-gradient(135deg, var(--accent), var(--accent-secondary))"
-            : "transparent",
-          borderColor: variant !== "primary" ? "var(--accent-border)" : undefined,
-          boxShadow: variant === "primary"
-            ? "0 0 30px var(--accent-glow), 0 0 60px rgba(59,130,246,0.1)"
-            : undefined,
+          padding: variant === "primary" ? "16px 36px" : "14px 28px",
+          borderRadius: "4px",
+          fontFamily: "var(--font-inter), sans-serif",
+          fontWeight: 600,
+          fontSize: "15px",
+          letterSpacing: "0.05em",
+          textTransform: "uppercase" as const,
+          ...(variant === "primary" ? {
+            background: "var(--accent)",
+            color: "#000000",
+            border: "2px solid var(--accent)",
+          } : variant === "ghost" ? {
+            background: "transparent",
+            color: "var(--text)",
+            border: "1px solid rgba(255,255,255,0.15)",
+          } : {
+            background: "transparent",
+            color: "var(--text)",
+            border: "1px solid var(--accent-border)",
+          }),
         }}
       >
-        {/* Shimmer */}
-        {!prefersReduced && variant === "primary" && (
+        {/* Border draw animation on hover — primary */}
+        {variant === "primary" && !prefersReduced && (
           <motion.div
-            className="absolute inset-0"
+            className="absolute inset-0 pointer-events-none"
             style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)",
-              backgroundSize: "200% 100%",
+              border: "2px solid #000",
+              borderRadius: "4px",
             }}
-            animate={{ backgroundPosition: ["-200% center", "200% center"] }}
-            transition={{ duration: 2.5, repeatDelay: 3, repeat: Infinity, ease: "linear" }}
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={hovered ? { clipPath: "inset(0 0% 0 0)" } : { clipPath: "inset(0 100% 0 0)" }}
+            transition={{ duration: 0.3, ease: [0.76, 0, 0.24, 1] }}
           />
         )}
-        {/* Hover glow ring */}
-        <div
-          className="absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ boxShadow: "inset 0 0 20px rgba(59,130,246,0.15)" }}
-        />
+        {/* Arrow indicator */}
         <span className="relative z-10">{children}</span>
+        {variant === "primary" && (
+          <motion.span
+            className="relative z-10"
+            animate={hovered ? { x: 4 } : { x: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ color: "#000" }}
+          >
+            →
+          </motion.span>
+        )}
       </Component>
     </motion.div>
   );

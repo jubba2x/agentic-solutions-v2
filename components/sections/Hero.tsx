@@ -1,263 +1,154 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronDown } from "lucide-react";
-import SplitText from "@/components/shared/SplitText";
-import MorphingText from "@/components/shared/MorphingText";
-import MagneticButton from "@/components/shared/MagneticButton";
-import AnimatedCounter from "@/components/shared/AnimatedCounter";
-import { usePrefersReducedMotion, useIsMobile } from "@/lib/hooks";
-import { HERO, EASE_SNAPPY, BOOKING_URL } from "@/lib/constants";
-
-function StarfieldCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef<number>(0);
-  const isMobile = useIsMobile();
-  const prefersReduced = usePrefersReducedMotion();
-
-  const starsRef = useRef<{ x: number; y: number; z: number; size: number; hue: number }[]>([]);
-
-  const init = useCallback((w: number, h: number) => {
-    const count = prefersReduced ? 50 : isMobile ? 100 : 250;
-    starsRef.current = Array.from({ length: count }, () => ({
-      x: Math.random() * w - w / 2,
-      y: Math.random() * h - h / 2,
-      z: Math.random() * 1000,
-      size: Math.random() * 1.5 + 0.5,
-      hue: 200 + Math.random() * 60,
-    }));
-  }, [isMobile, prefersReduced]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      if (starsRef.current.length === 0) init(rect.width, rect.height);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const speed = prefersReduced ? 0.2 : 0.5;
-
-    const draw = () => {
-      const rect = canvas.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-      const cx = w / 2;
-      const cy = h / 2;
-
-      ctx.fillStyle = "rgba(3, 0, 20, 0.15)";
-      ctx.fillRect(0, 0, w, h);
-
-      for (const star of starsRef.current) {
-        star.z -= speed;
-        if (star.z <= 0) {
-          star.z = 1000;
-          star.x = Math.random() * w - cx;
-          star.y = Math.random() * h - cy;
-        }
-
-        const sx = (star.x / star.z) * 300 + cx;
-        const sy = (star.y / star.z) * 300 + cy;
-        const r = (1 - star.z / 1000) * star.size * 2;
-        const alpha = (1 - star.z / 1000) * 0.8;
-
-        if (sx >= 0 && sx <= w && sy >= 0 && sy <= h) {
-          ctx.beginPath();
-          ctx.arc(sx, sy, Math.max(r, 0.3), 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${star.hue}, 70%, 75%, ${alpha})`;
-          ctx.fill();
-
-          // Star trail
-          if (!prefersReduced && r > 0.8) {
-            const trail = r * 4;
-            const gradient = ctx.createLinearGradient(sx, sy, sx + (star.x > 0 ? -trail : trail), sy);
-            gradient.addColorStop(0, `hsla(${star.hue}, 70%, 75%, ${alpha * 0.3})`);
-            gradient.addColorStop(1, "transparent");
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = r * 0.5;
-            ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx + (star.x > 0 ? -trail : trail), sy + (star.y > 0 ? -trail * 0.3 : trail * 0.3));
-            ctx.stroke();
-          }
-        }
-      }
-      animRef.current = requestAnimationFrame(draw);
-    };
-    animRef.current = requestAnimationFrame(draw);
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(animRef.current);
-    };
-  }, [init, prefersReduced]);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />;
-}
-
-const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6, delay, ease: EASE_SNAPPY },
-});
+import { HERO, BOOKING_URL } from "@/lib/constants";
 
 export default function Hero() {
-  const heroRef = useRef<HTMLElement>(null);
-  const prefersReduced = usePrefersReducedMotion();
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [currentPrompt, setCurrentPrompt] = useState(0);
 
   const { scrollYProgress } = useScroll({
-    target: heroRef,
+    target: sectionRef,
     offset: ["start start", "end start"],
   });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const heroTextY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const heroTextOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const promptBarY = useTransform(scrollYProgress, [0, 0.5], [0, 300]);
+  const promptBarOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPrompt((p) => (p + 1) % HERO.prompts.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section
-      ref={heroRef}
-      id="hero"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden"
-      style={{ background: "var(--bg)" }}
-    >
-      {/* Starfield */}
-      <StarfieldCanvas />
+    <section ref={sectionRef} className="relative h-dvh min-h-screen overflow-hidden">
 
-      {/* Nebula gradient */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.08) 0%, transparent 50%), radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.06) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, rgba(6,182,212,0.05) 0%, transparent 50%)",
-        }}
-      />
-
-      {/* Grid overlay */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-          maskImage: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
-        }}
-      />
-
+      {/* Hero Content */}
       <motion.div
-        className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-4 text-center"
-        style={prefersReduced ? {} : { scale, opacity }}
+        className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4"
+        style={{ y: heroTextY, opacity: heroTextOpacity }}
       >
-        {/* Badge */}
-        <motion.div
-          {...fadeUp(0.2)}
-          className="mb-8 rounded-full px-6 py-2.5 text-sm"
-          style={{
-            border: "1px solid rgba(59,130,246,0.2)",
-            background: "rgba(59,130,246,0.05)",
-            color: "var(--accent)",
-            backdropFilter: "blur(10px)",
-          }}
+        {/* Main headline line 1 */}
+        <motion.h1
+          className="italic text-[clamp(2.2rem,6vw,4.5rem)] font-extrabold text-white leading-[1.1] tracking-tight max-w-4xl"
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif", textShadow: "0 2px 40px rgba(0,0,0,0.6)" }}
+          initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
         >
-          {HERO.badge}
-        </motion.div>
+          {HERO.headlinePart1}
+        </motion.h1>
 
-        {/* Headline */}
-        <div className="mb-6">
-          <SplitText
-            text={HERO.headline}
-            as="h1"
-            className="text-4xl font-bold leading-tight md:text-6xl lg:text-8xl"
-            staggerDelay={0.03}
-            delay={0.4}
-          />
-          <h1
-            className="mt-2 text-4xl font-bold leading-tight md:text-6xl lg:text-8xl"
-            aria-hidden="true"
+        {/* Headline line 2 — "Let Agentic Solutions Fix That." with brand name in logo font */}
+        <motion.h2
+          className="mt-2 text-[clamp(2rem,5.5vw,4rem)] font-extrabold text-white leading-[1.1] tracking-tight max-w-4xl"
+          style={{ fontFamily: "var(--font-playfair), Georgia, serif", textShadow: "0 2px 40px rgba(0,0,0,0.6)" }}
+          initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+        >
+          <span className="italic">{HERO.headlinePart2} </span>
+          <span
+            className="not-italic"
+            style={{
+              fontFamily: "var(--font-logo, var(--font-geist-sans), system-ui)",
+              color: "var(--accent, #7BB5D6)",
+              fontWeight: 800,
+            }}
           >
-            <MorphingText
-              words={HERO.morphingWords}
-              interval={3000}
-              className="bg-gradient-to-r from-accent via-accent-secondary to-accent-tertiary bg-clip-text text-transparent"
-              delay={1500}
-            />
-          </h1>
-        </div>
+            {HERO.brandName}
+          </span>
+          <span className="italic"> {HERO.headlinePart3}</span>
+        </motion.h2>
 
-        {/* Subheadline */}
+        {/* Tagline */}
         <motion.p
-          {...fadeUp(1.0)}
-          className="mx-auto mb-10 max-w-2xl text-lg text-text-body md:text-xl"
+          className="mt-5 text-lg tracking-wide"
+          style={{ color: "var(--text-body)", textShadow: "0 1px 20px rgba(0,0,0,0.8)" }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
         >
-          {HERO.subheadline}
+          {HERO.tagline}
         </motion.p>
 
-        {/* CTAs */}
-        <motion.div
-          {...fadeUp(1.2)}
-          className="mb-14 flex flex-col items-center gap-4 sm:flex-row"
+        {/* CTA Button */}
+        <motion.a
+          href={BOOKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 px-8 py-3 rounded-full border border-white/40 text-white text-sm font-medium backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-400 relative overflow-hidden group"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
-          <MagneticButton href={BOOKING_URL} variant="primary">
-            {HERO.ctaPrimary}
-          </MagneticButton>
-          <MagneticButton
-            variant="ghost"
-            onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            {HERO.ctaSecondary}
-          </MagneticButton>
-        </motion.div>
-
-        {/* Stats */}
-        <div className="grid w-full max-w-3xl grid-cols-2 gap-6 md:grid-cols-4">
-          {HERO.stats.map((stat, i) => (
-            <motion.div
-              key={stat.unit}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 1.5 + i * 0.1, ease: EASE_SNAPPY }}
-              className="group flex flex-col items-center rounded-xl border p-4 transition-all duration-300 hover:border-accent-border"
-              style={{ borderColor: "var(--border)", background: "rgba(255,255,255,0.02)", backdropFilter: "blur(10px)" }}
-            >
-              <span className="text-3xl font-bold md:text-4xl" style={{ color: "var(--accent)" }}>
-                <AnimatedCounter
-                  value={stat.value}
-                  prefix={"prefix" in stat ? String(stat.prefix) : ""}
-                  suffix={stat.suffix}
-                />
-              </span>
-              <span className="mt-1 text-sm text-text-muted">{stat.unit}</span>
-            </motion.div>
-          ))}
-        </div>
+          <span className="relative z-10">{HERO.cta}</span>
+          <div className="absolute inset-0 bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+        </motion.a>
       </motion.div>
 
-      {/* Scroll indicator */}
+      {/* Prompt Showcase Bar */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 2.2, duration: 0.5 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-2xl px-4"
+        style={{ y: promptBarY, opacity: promptBarOpacity }}
       >
         <motion.div
-          animate={{ opacity: [0.3, 1, 0.3], y: [0, 8, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2"
+          className="backdrop-blur-xl rounded-2xl border px-5 py-3.5 flex items-center gap-4"
+          style={{
+            background: "rgba(10, 15, 24, 0.7)",
+            borderColor: "rgba(123, 181, 214, 0.12)",
+          }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1 }}
         >
-          <span className="text-xs text-text-muted tracking-widest" style={{ fontFamily: "var(--font-mono)" }}>SCROLL</span>
-          <ChevronDown className="h-5 w-5" style={{ color: "var(--accent)" }} />
+          {/* Icon */}
+          <div
+            className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center"
+            style={{ background: "rgba(123, 181, 214, 0.1)", border: "1px solid rgba(123, 181, 214, 0.15)" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+
+          {/* Prompt text with cycling animation */}
+          <div className="flex-1 min-w-0">
+            <PromptCycler prompts={HERO.prompts} current={currentPrompt} />
+          </div>
         </motion.div>
       </motion.div>
     </section>
+  );
+}
+
+function PromptCycler({ prompts, current }: { prompts: readonly string[]; current: number }) {
+  return (
+    <div className="relative h-5 overflow-hidden">
+      {prompts.map((prompt, i) => (
+        <motion.p
+          key={i}
+          className="absolute inset-0 text-sm truncate"
+          style={{ color: "var(--text-body)" }}
+          initial={false}
+          animate={{
+            y: i === current ? 0 : i > current ? 20 : -20,
+            opacity: i === current ? 1 : 0,
+          }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {prompt}
+        </motion.p>
+      ))}
+    </div>
   );
 }

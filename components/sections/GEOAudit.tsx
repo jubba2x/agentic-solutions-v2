@@ -49,8 +49,8 @@ function ChatMock() {
   }, [prefersReduced]);
 
   return (
-    <div ref={sectionRef} className="overflow-hidden rounded-2xl border" style={{ borderColor: "rgba(59,130,246,0.15)", background: "rgba(3,0,20,0.6)", backdropFilter: "blur(20px)" }}>
-      <div className="flex items-center gap-2 border-b px-5 py-3" style={{ borderColor: "rgba(59,130,246,0.1)" }}>
+    <div ref={sectionRef} className="overflow-hidden rounded-2xl border" style={{ borderColor: "rgba(123,181,214,0.12)", background: "rgba(6,10,16,0.8)" }}>
+      <div className="flex items-center gap-2 border-b px-5 py-3" style={{ borderColor: "rgba(123,181,214,0.1)" }}>
         <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#EF4444" }} />
         <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#F59E0B" }} />
         <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#22C55E" }} />
@@ -58,8 +58,8 @@ function ChatMock() {
       </div>
 
       <div className="p-5 md:p-6">
-        <div className="mb-4 rounded-lg px-4 py-3" style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.1)" }}>
-          <p className="text-sm text-text-body">
+        <div className="mb-4 rounded-lg px-4 py-3" style={{ background: "rgba(123,181,214,0.05)", border: "1px solid rgba(123,181,214,0.1)" }}>
+          <p className="text-sm" style={{ color: "var(--text-body)" }}>
             <TypewriterText text={GEO_AUDIT.prompt} speed={25} trigger={phase === "typing" || phase === "thinking" || phase === "results"} onComplete={handleTypingComplete} />
           </p>
         </div>
@@ -78,8 +78,11 @@ function ChatMock() {
             {GEO_AUDIT.results.map((result, ri) => (
               <motion.div
                 key={result.name}
-                className={`rounded-lg px-4 py-3 text-sm ${result.featured ? "font-semibold text-white" : "text-text-muted"}`}
-                style={result.featured ? { background: "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.08))", border: "1px solid rgba(59,130,246,0.2)" } : { background: "rgba(255,255,255,0.02)" }}
+                className={`rounded-lg px-4 py-3 text-sm ${result.featured ? "font-semibold text-white" : ""}`}
+                style={result.featured
+                  ? { background: "linear-gradient(135deg, rgba(123,181,214,0.1), rgba(123,181,214,0.08))", border: "1px solid rgba(123,181,214,0.2)", color: "white" }
+                  : { background: "rgba(255,255,255,0.02)", color: "var(--text-muted)" }
+                }
                 variants={prefersReduced ? {} : { hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: EASE_SNAPPY } } }}
               >
                 <div className="flex items-center gap-2">
@@ -106,7 +109,7 @@ export default function GEOAudit() {
 
   return (
     <section id="geo-audit" className="relative py-24 md:py-32 overflow-hidden" style={{ background: "var(--bg)" }}>
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 70% 50%, rgba(6,182,212,0.04) 0%, transparent 60%)" }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 70% 50%, rgba(123,181,214,0.04) 0%, transparent 60%)" }} />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2 md:gap-16">
         <motion.div
@@ -121,7 +124,7 @@ export default function GEOAudit() {
         <div>
           <motion.span
             className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs tracking-widest uppercase"
-            style={{ background: "rgba(6,182,212,0.08)", color: "#06B6D4", border: "1px solid rgba(6,182,212,0.15)", fontFamily: "var(--font-mono)" }}
+            style={{ background: "rgba(123,181,214,0.08)", color: "#7BB5D6", border: "1px solid rgba(123,181,214,0.15)", fontFamily: "var(--font-mono)" }}
             initial={prefersReduced ? {} : { opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -139,7 +142,8 @@ export default function GEOAudit() {
             {GEO_AUDIT.heading}
           </motion.h2>
           <motion.p
-            className="text-base leading-relaxed text-text-body md:text-lg"
+            className="text-base leading-relaxed md:text-lg"
+            style={{ color: "var(--text-body)" }}
             initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

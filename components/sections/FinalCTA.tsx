@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import MagneticButton from "@/components/shared/MagneticButton";
@@ -10,7 +9,6 @@ import { FINAL_CTA, EASE_SNAPPY, BOOKING_URL } from "@/lib/constants";
 function PulsingLogo({ reduced }: { reduced: boolean }) {
   return (
     <div className="relative mb-12 flex items-center justify-center">
-      {/* Outer glow rings */}
       {!reduced && [1, 2, 3].map((ring) => (
         <motion.div
           key={ring}
@@ -18,7 +16,7 @@ function PulsingLogo({ reduced }: { reduced: boolean }) {
           style={{
             width: 120 + ring * 60,
             height: 120 + ring * 60,
-            borderColor: `rgba(59,130,246,${0.15 - ring * 0.04})`,
+            borderColor: `rgba(123,181,214,${0.15 - ring * 0.04})`,
           }}
           animate={{
             scale: [1, 1.1, 1],
@@ -33,18 +31,15 @@ function PulsingLogo({ reduced }: { reduced: boolean }) {
         />
       ))}
 
-      {/* Center glow */}
       <div
         className="absolute rounded-full"
         style={{
           width: 200,
           height: 200,
-          background: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.08) 50%, transparent 70%)",
-          filter: "blur(20px)",
+          background: "radial-gradient(circle, rgba(123,181,214,0.15) 0%, rgba(180,160,216,0.08) 50%, transparent 70%)",
         }}
       />
 
-      {/* Logo */}
       <motion.div
         animate={reduced ? {} : {
           y: [0, -8, 0],
@@ -72,34 +67,33 @@ export default function FinalCTA() {
       className="relative py-28 md:py-36 overflow-hidden"
       style={{ background: "var(--bg)" }}
     >
-      {/* Gradient mesh */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.08) 0%, transparent 50%), radial-gradient(ellipse at 30% 70%, rgba(139,92,246,0.05) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(6,182,212,0.04) 0%, transparent 50%)",
+          background: "radial-gradient(ellipse at 50% 30%, rgba(123,181,214,0.08) 0%, transparent 50%), radial-gradient(ellipse at 30% 70%, rgba(180,160,216,0.05) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(6,182,212,0.04) 0%, transparent 50%)",
         }}
       />
 
       <div className="relative mx-auto max-w-2xl px-4 text-center">
-        {/* Animated logo */}
         <PulsingLogo reduced={prefersReduced} />
 
         <motion.h2
           className="mb-6 text-3xl font-bold md:text-5xl lg:text-6xl"
-          initial={prefersReduced ? {} : { opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={prefersReduced ? {} : { opacity: 0, filter: "blur(12px)" }}
+          whileInView={{ opacity: 1, filter: "blur(0px)" }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: EASE_SNAPPY }}
+          transition={{ duration: 0.7 }}
         >
           {FINAL_CTA.heading}
         </motion.h2>
 
         <motion.p
-          className="mb-4 text-base leading-relaxed text-text-body md:text-lg"
-          initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          className="mb-4 text-base leading-relaxed md:text-lg"
+          style={{ color: "var(--text-body)" }}
+          initial={prefersReduced ? {} : { opacity: 0, filter: "blur(8px)" }}
+          whileInView={{ opacity: 1, filter: "blur(0px)" }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2, ease: EASE_SNAPPY }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           {FINAL_CTA.body}
         </motion.p>
@@ -107,8 +101,8 @@ export default function FinalCTA() {
         <motion.p
           className="mb-10 text-sm font-medium md:text-base"
           style={{ color: "var(--accent)" }}
-          initial={prefersReduced ? {} : { opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={prefersReduced ? {} : { opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4, ease: EASE_SNAPPY }}
         >
@@ -116,10 +110,10 @@ export default function FinalCTA() {
         </motion.p>
 
         <motion.div
-          initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={prefersReduced ? {} : { opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.6, ease: EASE_SNAPPY }}
+          transition={{ duration: 0.5, delay: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
         >
           <MagneticButton href={BOOKING_URL} variant="primary" strength={0.3}>
             {FINAL_CTA.cta}
@@ -127,7 +121,8 @@ export default function FinalCTA() {
         </motion.div>
 
         <motion.p
-          className="mt-5 text-xs text-text-muted md:text-sm"
+          className="mt-5 text-xs md:text-sm"
+          style={{ color: "var(--text-muted)" }}
           initial={prefersReduced ? {} : { opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
